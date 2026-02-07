@@ -4,6 +4,7 @@ import { Dashboard } from './pages/Dashboard';
 import { StudentRegistration } from './pages/StudentRegistration';
 import { VideoManagement } from './pages/VideoManagement';
 import { AttendanceReports } from './pages/AttendanceReports';
+import { AttendancePage } from './pages/AttendancePage';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ClassSelection } from './pages/ClassSelection';
@@ -62,7 +63,7 @@ function App() {
               <Signup />
             </PublicRoute>
           } />
-          
+
           <Route path="/login" element={
             <PublicRoute>
               <Login />
@@ -92,21 +93,21 @@ function App() {
                 <Navigate to="dashboard" replace />
               </RoleProtectedRoute>
             } />
-            
+
             {/* Dashboard - accessible to both */}
             <Route path="dashboard" element={
               <RoleProtectedRoute allowedRoles={['teacher', 'student']}>
                 <Dashboard />
               </RoleProtectedRoute>
             } />
-            
+
             {/* Reports - accessible to both */}
             <Route path="reports" element={
               <RoleProtectedRoute allowedRoles={['teacher', 'student']}>
                 <AttendanceReports />
               </RoleProtectedRoute>
             } />
-            
+
             {/* Teacher-only routes */}
             <Route path="upload" element={
               <RoleProtectedRoute allowedRoles={['teacher']}>
@@ -116,6 +117,11 @@ function App() {
             <Route path="registration" element={
               <RoleProtectedRoute allowedRoles={['teacher']}>
                 <StudentRegistration />
+              </RoleProtectedRoute>
+            } />
+            <Route path="attendance" element={
+              <RoleProtectedRoute allowedRoles={['teacher']}>
+                <AttendancePage />
               </RoleProtectedRoute>
             } />
           </Route>

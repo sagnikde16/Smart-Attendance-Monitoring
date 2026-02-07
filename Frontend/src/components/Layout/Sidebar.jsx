@@ -16,6 +16,7 @@ export function Sidebar() {
     // Teacher-only links
     const teacherLinks = [
         { to: `/class/${classId}/registration`, icon: UserPlus, label: 'Registration' },
+        { to: `/class/${classId}/attendance`, icon: Video, label: 'Take Attendance' },
         { to: `/class/${classId}/upload`, icon: Video, label: 'Video Management' },
     ];
 
