@@ -1,4 +1,6 @@
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AddClassModal } from '../components/AddClassModal';
 import { classes } from '../data/mockData';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -8,6 +10,46 @@ import { useAuth } from '../context/AuthContext';
 export function ClassSelection() {
     const navigate = useNavigate();
     const { isTeacher, isStudent, user } = useAuth();
+
+    const [classList, setClassList] = useState(classes); // Start with mock data
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        fetchClasses();
+    }, []);
+
+    const fetchClasses = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/classes');
+            if (response.ok) {
+                const data = await response.json();
+                // Avoid duplicates if we reload
+                const newClasses = data.filter(c => !classList.some(existing => existing.id === c.id));
+                // Actually, since I initialize with 'classes' (mock), I should just append backend classes.
+                // But react strict mode might double fetch.
+                // Let's just append the ones from backend that are not in default 'classes'.
+                // Backend IDs start at C201. Mock are C101-C103.
+                setClassList([...classes, ...data]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch classes:", error);
+        }
+    };
+
+    const handleAddClass = async (classData) => {
+        const response = await fetch('http://localhost:5000/api/classes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(classData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add class');
+        }
+
+        const newClass = await response.json();
+        setClassList(prev => [...prev, newClass]);
+    };
 
     const handleClassClick = (classId) => {
         // Navigate based on role - students go to dashboard, teachers to upload
@@ -25,21 +67,21 @@ export function ClassSelection() {
                     <div>
                         <h1 className="text-3xl font-bold text-brand-900">My Classes</h1>
                         <p className="text-brand-500 mt-2">
-                            {isTeacher() 
+                            {isTeacher()
                                 ? 'Select a class to manage recordings and attendance.'
                                 : 'Select a class to view your attendance and dashboard.'
                             }
                         </p>
                     </div>
                     {isTeacher() && (
-                        <Button className="gap-2">
+                        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
                             <Plus className="h-4 w-4" /> Add New Class
                         </Button>
                     )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {classes.map((cls) => (
+                    {classList.map((cls) => (
                         <Card
                             key={cls.id}
                             className="group hover:border-primary-200 hover:shadow-lg transition-all cursor-pointer overflow-hidden"
@@ -79,6 +121,12 @@ export function ClassSelection() {
                     ))}
                 </div>
             </div>
+
+            <AddClassModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onAdd={handleAddClass}
+            />
         </div>
     );
 }

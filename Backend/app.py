@@ -16,6 +16,7 @@ CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 UPLOAD_FOLDER = Path(__file__).parent / "uploads"
 DATA_FOLDER = Path(__file__).parent / "data"
 REGISTRATIONS_FILE = DATA_FOLDER / "registrations.json"
+CLASSES_FILE = DATA_FOLDER / "classes.json"
 
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 DATA_FOLDER.mkdir(exist_ok=True)
@@ -42,6 +43,21 @@ def load_registrations():
 
 def save_registrations(data):
     with open(REGISTRATIONS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def load_classes():
+    if not CLASSES_FILE.exists():
+        return []
+    try:
+        with open(CLASSES_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+
+def save_classes(data):
+    with open(CLASSES_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
 
@@ -136,6 +152,46 @@ def get_video(video_id):
     if not os.path.isfile(path):
         return jsonify({"error": "Video not found"}), 404
     return send_file(path, as_attachment=False, download_name=video_id)
+
+
+@app.route("/api/classes", methods=["GET"])
+def get_classes():
+    return jsonify(load_classes())
+
+
+@app.route("/api/classes", methods=["POST"])
+def add_class():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "JSON body required"}), 400
+    
+    name = data.get("name")
+    code = data.get("code") # e.g. CS-101
+    time_schedule = data.get("time") # e.g. Mon/Wed 09:00 AM
+    image = data.get("image", "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60")
+
+    if not name or not code or not time_schedule:
+        return jsonify({"error": "name, code, and time are required"}), 400
+
+    classes = load_classes()
+    new_id = f"C{len(classes) + 201}" # Start from 201 to avoid conflict with mock data C101-C103
+    
+    # Check if ID exists (edge case with deletions, but simple for now)
+    while any(c["id"] == new_id for c in classes):
+         new_id = f"C{int(new_id[1:]) + 1}"
+
+    new_class = {
+        "id": new_id,
+        "name": f"{code}: {name}", # Format to match mock data expectation
+        "time": time_schedule,
+        "students": 0, # Default
+        "image": image
+    }
+    
+    classes.append(new_class)
+    save_classes(classes)
+    
+    return jsonify(new_class), 201
 
 
 if __name__ == "__main__":
