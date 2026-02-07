@@ -75,7 +75,7 @@ export function AttendanceReports() {
             document.body.removeChild(a);
         } catch (error) {
             console.error("Export error:", error);
-            alert("Failed to export attendance");
+            alert(`Failed to export attendance: ${error.message}`);
         } finally {
             setExporting(false);
         }

@@ -2,8 +2,9 @@ import React, { useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Upload, Save, User, Video, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, Save, User, Video, CheckCircle, AlertCircle, Loader2, Camera } from 'lucide-react';
 import { classes } from '../data/mockData';
+import { VideoRecorder } from '../components/ui/VideoRecorder';
 
 export function StudentRegistration() {
     const { classId } = useParams();
@@ -135,42 +136,58 @@ export function StudentRegistration() {
                             </Card.Title>
                         </Card.Header>
                         <Card.Content className="space-y-4">
-                            <p className="text-sm text-gray-600">
-                                Upload a short video (10-30s) containing the student's face.
-                                The system will detect and cluster faces automatically.
-                            </p>
-
-                            <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors">
-                                <input
-                                    type="file"
-                                    id="video-upload"
-                                    accept="video/*"
-                                    className="hidden"
-                                    onChange={handleFileChange}
-                                />
-                                <label htmlFor="video-upload" className="cursor-pointer flex flex-col items-center">
-                                    <Upload className="h-10 w-10 text-brand-400 mb-3" />
-                                    <span className="text-sm font-medium text-brand-700">
-                                        {file ? file.name : "Click to select video"}
-                                    </span>
-                                    <span className="text-xs text-gray-500 mt-1">MP4, MOV, AVI supported</span>
-                                </label>
+                            <div className="flex border-b border-gray-200 mb-4">
+                                <button className={`flex-1 py-2 text-sm font-medium ${!file ? 'text-brand-600 border-b-2 border-brand-600' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => setFile(null)}>
+                                    Upload File
+                                </button>
+                                <button className={`flex-1 py-2 text-sm font-medium ${!file ? 'text-gray-500' : 'text-brand-600 border-b-2 border-brand-600'}`}>
+                                    Webcam
+                                </button>
                             </div>
 
-                            <Button
-                                onClick={handleUpload}
-                                disabled={!file || processing}
-                                className="w-full"
-                            >
-                                {processing ? (
-                                    <>
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    'Process Video'
-                                )}
-                            </Button>
+                            <div className="space-y-4">
+                                <p className="text-sm text-gray-600">
+                                    Upload or record a short video (10-30s) containing the student's face.
+                                </p>
+
+                                <VideoRecorder onRecordingComplete={(recordedFile) => setFile(recordedFile)} />
+
+                                <div className="relative flex items-center justify-center">
+                                    <div className="border-t w-full border-gray-200 absolute"></div>
+                                    <span className="bg-white px-2 text-xs text-gray-400 z-10">OR UPLOAD</span>
+                                </div>
+
+                                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors">
+                                    <input
+                                        type="file"
+                                        id="video-upload"
+                                        accept="video/*"
+                                        className="hidden"
+                                        onChange={handleFileChange}
+                                    />
+                                    <label htmlFor="video-upload" className="cursor-pointer flex flex-col items-center">
+                                        <Upload className="h-8 w-8 text-brand-400 mb-2" />
+                                        <span className="text-sm font-medium text-brand-700">
+                                            {file && !file.type.startsWith('video/webm') ? file.name : "Select Video File"}
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <Button
+                                    onClick={handleUpload}
+                                    disabled={!file || processing}
+                                    className="w-full"
+                                >
+                                    {processing ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        'Process Video'
+                                    )}
+                                </Button>
+                            </div>
                         </Card.Content>
                     </Card>
 
