@@ -1,8 +1,17 @@
 [
   {
     "id": "C201",
-    "name": "IM21201: PPC",
-    "time": "Mon 9am",
+    "name": "IM20015: Supply Chain",
+    "time": "davx",
+    "teacherId": "abc",
+    "students": 0,
+    "image": ""
+  },
+  {
+    "id": "C202",
+    "name": "IM31025: SL",
+    "time": "MON 9AM",
+    "teacherId": "456",
     "students": 0,
     "image": ""
   }

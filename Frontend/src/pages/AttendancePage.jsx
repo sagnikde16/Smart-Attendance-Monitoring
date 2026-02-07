@@ -16,6 +16,8 @@ export function AttendancePage() {
     const [error, setError] = useState(null);
     const [saved, setSaved] = useState(false);
 
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 16)); // Default to current datetime-local format
+
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files[0]) {
             setFile(e.target.files[0]);
@@ -37,7 +39,7 @@ export function AttendancePage() {
         formData.append('classId', classId);
 
         try {
-            const response = await fetch('http://localhost:5000/api/process-attendance-video', {
+            const response = await fetch('http://localhost:8000/api/process-attendance-video', {
                 method: 'POST',
                 body: formData,
             });
@@ -63,12 +65,12 @@ export function AttendancePage() {
         try {
             const payload = {
                 classId: classId,
-                date: new Date().toISOString(),
+                date: new Date(selectedDate).toISOString(),
                 present_students: results.present_students, // Save full objects (Snapshot)
                 video_processed: true
             };
 
-            const response = await fetch('http://localhost:5000/api/attendance', {
+            const response = await fetch('http://localhost:8000/api/attendance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -90,8 +92,17 @@ export function AttendancePage() {
                 <div>
                     <h1 className="text-3xl font-bold text-brand-900">Take Attendance</h1>
                     <p className="text-brand-500 mt-1">
-                        Process class video for <span className="font-semibold text-brand-700">{currentClass.name}</span>
+                        Process class session for <span className="font-semibold text-brand-700">{currentClass.name}</span>
                     </p>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Session Date & Time</label>
+                    <input
+                        type="datetime-local"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        className="px-3 py-2 border rounded-md focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                    />
                 </div>
             </div>
 

@@ -81,7 +81,7 @@ def get_embedding_for_face(image_path):
             img_path=image_path,
             detector_backend="skip", # We already detected/cropped
             align=True,
-            model_name="VGG-Face",
+            model_name="Facenet512",
             enforce_detection=False,
         )
         if objs and len(objs) > 0:

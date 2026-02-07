@@ -9,7 +9,7 @@ export function Signup() {
     const navigate = useNavigate();
     const { signup } = useAuth();
     const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [role, setRole] = useState('teacher'); // 'teacher' or 'student'
@@ -38,18 +38,23 @@ export function Signup() {
             return;
         }
 
+        if (!identifier.trim()) {
+            setError(role === 'teacher' ? 'Please enter your Teacher ID' : 'Please enter your Roll Number');
+            return;
+        }
+
         setIsLoading(true);
 
         try {
             // Mock signup delay
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             // Attempt signup
-            const newUser = signup(email, password, name.trim(), role);
-            
+            const newUser = signup(identifier, password, name.trim(), role);
+
             setIsLoading(false);
             setSuccess(true);
-            
+
             // Navigate after short delay
             setTimeout(() => {
                 navigate('/classes');
@@ -64,7 +69,7 @@ export function Signup() {
         <div className="min-h-screen bg-brand-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-brand-900">EduVision AI</h1>
+                    <h1 className="text-3xl font-bold text-brand-900">Smart Attendance Monitoring</h1>
                     <p className="text-brand-500 mt-2">Create your account</p>
                 </div>
 
@@ -80,11 +85,10 @@ export function Signup() {
                                         setRole('teacher');
                                         setError('');
                                     }}
-                                    className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                                        role === 'teacher'
-                                            ? 'border-primary-500 bg-primary-50 text-primary-700'
-                                            : 'border-brand-200 bg-white text-brand-600 hover:border-brand-300'
-                                    }`}
+                                    className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${role === 'teacher'
+                                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                                        : 'border-brand-200 bg-white text-brand-600 hover:border-brand-300'
+                                        }`}
                                 >
                                     <User className="h-5 w-5" />
                                     <span className="font-medium">Teacher</span>
@@ -95,11 +99,10 @@ export function Signup() {
                                         setRole('student');
                                         setError('');
                                     }}
-                                    className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                                        role === 'student'
-                                            ? 'border-primary-500 bg-primary-50 text-primary-700'
-                                            : 'border-brand-200 bg-white text-brand-600 hover:border-brand-300'
-                                    }`}
+                                    className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${role === 'student'
+                                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                                        : 'border-brand-200 bg-white text-brand-600 hover:border-brand-300'
+                                        }`}
                                 >
                                     <GraduationCap className="h-5 w-5" />
                                     <span className="font-medium">Student</span>
@@ -141,19 +144,21 @@ export function Signup() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-brand-700">Email Address</label>
+                                <label className="text-sm font-medium text-brand-700">
+                                    {role === 'teacher' ? 'Teacher ID' : 'Roll Number'}
+                                </label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-brand-400" />
                                     <input
-                                        type="email"
+                                        type="text"
                                         required
-                                        value={email}
+                                        value={identifier}
                                         onChange={(e) => {
-                                            setEmail(e.target.value);
+                                            setIdentifier(e.target.value);
                                             setError('');
                                         }}
                                         className="w-full h-11 pl-10 pr-4 rounded-lg border border-brand-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-shadow"
-                                        placeholder={role === 'teacher' ? 'teacher@school.edu' : 'student@school.edu'}
+                                        placeholder={role === 'teacher' ? 'T001' : 'STU001'}
                                     />
                                 </div>
                             </div>
@@ -214,8 +219,8 @@ export function Signup() {
                         <div className="mt-6 pt-6 border-t border-brand-200">
                             <p className="text-sm text-center text-brand-600">
                                 Already have an account?{' '}
-                                <Link 
-                                    to="/login" 
+                                <Link
+                                    to="/login"
                                     className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
                                 >
                                     Sign in
@@ -225,7 +230,7 @@ export function Signup() {
                     </Card.Content>
                     <div className="bg-brand-50 px-6 py-4 border-t border-brand-100 rounded-b-xl">
                         <p className="text-xs text-center text-brand-500">
-                            Protected by EduVision AI security systems.
+                            Protected by Smart Attendance Monitoring security systems.
                         </p>
                     </div>
                 </Card>

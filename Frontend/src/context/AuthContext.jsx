@@ -8,36 +8,27 @@ const initializeDefaultUsers = () => {
     if (!storedUsers) {
         const defaultUsers = {
             teachers: [
-                { email: 'teacher@school.edu', password: 'teacher123', role: 'teacher', name: 'Teacher Account' },
-                { email: 'admin@school.edu', password: 'admin123', role: 'teacher', name: 'Admin Teacher' },
+                { teacherId: 'T001', password: 'teacher123', role: 'teacher', name: 'Teacher Account' },
+                { teacherId: 'ADMIN', password: 'admin123', role: 'teacher', name: 'Admin Teacher' },
             ],
             students: [
-                { email: 'student@school.edu', password: 'student123', role: 'student', name: 'Student Account', studentId: 'STU001' },
-                { email: 'john.doe@school.edu', password: 'student123', role: 'student', name: 'John Doe', studentId: 'STU002' },
+                { rollNo: 'STU001', password: 'student123', role: 'student', name: 'Student Account' },
+                { rollNo: 'STU002', password: 'student123', role: 'student', name: 'John Doe' },
             ],
         };
         localStorage.setItem('registeredUsers', JSON.stringify(defaultUsers));
         return defaultUsers;
-    }
+    };
     return JSON.parse(storedUsers);
-};
-
-// Generate unique student ID
-const generateStudentId = (existingStudents) => {
-    const maxId = existingStudents.reduce((max, student) => {
-        const idNum = parseInt(student.studentId?.replace('STU', '') || '0');
-        return idNum > max ? idNum : max;
-    }, 0);
-    return `STU${String(maxId + 1).padStart(3, '0')}`;
 };
 
 export const AuthProvider = ({ children }) => {
     // Initialize registered users
     const [registeredUsers, setRegisteredUsers] = useState(() => initializeDefaultUsers());
 
-    // Initialize state from localStorage so login persists on refresh
+    // Initialize state from sessionStorage so login persists on refresh but clears on close
     const [user, setUser] = useState(() => {
-        const savedUser = localStorage.getItem('user');
+        const savedUser = sessionStorage.getItem('user');
         return savedUser ? JSON.parse(savedUser) : null;
     });
 
@@ -46,31 +37,33 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
     }, [registeredUsers]);
 
-    const signup = (email, password, name, role) => {
-        // Check if user already exists
-        const allUsers = [...registeredUsers.teachers, ...registeredUsers.students];
-        const existingUser = allUsers.find(u => u.email === email);
-
-        if (existingUser) {
-            throw new Error('An account with this email already exists');
-        }
-
-        // Validate password
+    const signup = (identifier, password, name, role) => {
+        // Validation
         if (password.length < 6) {
             throw new Error('Password must be at least 6 characters long');
         }
 
+        // Check uniqueness based on role
+        if (role === 'teacher') {
+            const exists = registeredUsers.teachers.find(u => u.teacherId === identifier);
+            if (exists) throw new Error('Teacher ID already exists');
+        } else {
+            const exists = registeredUsers.students.find(u => u.rollNo === identifier);
+            if (exists) throw new Error('Roll Number already exists');
+        }
+
         // Create new user object
         const newUser = {
-            email,
             password,
             name,
             role,
         };
 
-        // Add studentId for students
-        if (role === 'student') {
-            newUser.studentId = generateStudentId(registeredUsers.students);
+        // Assign specific ID field
+        if (role === 'teacher') {
+            newUser.teacherId = identifier;
+        } else {
+            newUser.rollNo = identifier;
         }
 
         // Add to registered users
@@ -86,18 +79,24 @@ export const AuthProvider = ({ children }) => {
         // Auto-login after signup
         const { password: _, ...userWithoutPassword } = newUser;
         setUser(userWithoutPassword);
-        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+        sessionStorage.setItem('user', JSON.stringify(userWithoutPassword));
 
         return userWithoutPassword;
     };
 
-    const login = (email, password, role) => {
+    const login = (identifier, password, role) => {
         // Find user in registered users
         const userList = role === 'teacher' ? registeredUsers.teachers : registeredUsers.students;
-        const foundUser = userList.find(u => u.email === email && u.password === password);
+
+        let foundUser;
+        if (role === 'teacher') {
+            foundUser = userList.find(u => u.teacherId === identifier && u.password === password);
+        } else {
+            foundUser = userList.find(u => u.rollNo === identifier && u.password === password);
+        }
 
         if (!foundUser) {
-            throw new Error('Invalid email or password');
+            throw new Error('Invalid ID or password');
         }
 
         // Create user object without password
@@ -105,13 +104,13 @@ export const AuthProvider = ({ children }) => {
         const newUser = { ...userWithoutPassword };
 
         setUser(newUser);
-        localStorage.setItem('user', JSON.stringify(newUser));
+        sessionStorage.setItem('user', JSON.stringify(newUser));
         return newUser;
     };
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
     };
 
     const isTeacher = () => {

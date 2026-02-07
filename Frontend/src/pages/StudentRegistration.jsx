@@ -40,7 +40,7 @@ export function StudentRegistration() {
         formData.append('video', file);
 
         try {
-            const response = await fetch('http://localhost:5000/api/process-register-video', {
+            const response = await fetch('http://localhost:8000/api/process-register-video', {
                 method: 'POST',
                 body: formData,
             });
@@ -80,7 +80,7 @@ export function StudentRegistration() {
                 face_base64: selectedCluster.face_base64
             };
 
-            const response = await fetch('http://localhost:5000/api/students', {
+            const response = await fetch('http://localhost:8000/api/students', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

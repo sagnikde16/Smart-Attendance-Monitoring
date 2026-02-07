@@ -39,7 +39,7 @@ export function AddClassModal({ isOpen, onClose, onAdd }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-xl font-semibold text-gray-800">Add New Class</h2>
+                    <h2 className="text-xl font-semibold text-gray-800">Add New Subject</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -47,7 +47,7 @@ export function AddClassModal({ isOpen, onClose, onAdd }) {
                         <X size={24} />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     {error && (
                         <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
@@ -57,7 +57,7 @@ export function AddClassModal({ isOpen, onClose, onAdd }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Class Code <span className="text-red-500">*</span>
+                            Subject Code <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -72,7 +72,7 @@ export function AddClassModal({ isOpen, onClose, onAdd }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Class Name <span className="text-red-500">*</span>
+                            Subject Name <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -118,19 +118,19 @@ export function AddClassModal({ isOpen, onClose, onAdd }) {
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-4 border-t mt-6">
-                        <Button 
-                            type="button" 
-                            variant="outline" 
+                        <Button
+                            type="button"
+                            variant="outline"
                             onClick={onClose}
                             disabled={loading}
                         >
                             Cancel
                         </Button>
-                        <Button 
-                            type="submit" 
+                        <Button
+                            type="submit"
                             disabled={loading}
                         >
-                            {loading ? 'Adding...' : 'Add Class'}
+                            {loading ? 'Adding...' : 'Add Subject'}
                         </Button>
                     </div>
                 </form>

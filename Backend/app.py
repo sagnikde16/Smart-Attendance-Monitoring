@@ -188,7 +188,30 @@ def get_video(video_id):
 
 @app.route("/api/classes", methods=["GET"])
 def get_classes():
-    return jsonify(load_classes())
+    teacher_id = request.args.get("teacherId")
+    student_id = request.args.get("studentId") # This is the roll_no
+    
+    print(f"DEBUG: get_classes called with teacherId={teacher_id}, studentId={student_id}")
+
+    all_classes = load_classes()
+    
+    if teacher_id:
+        # Filter classes for this teacher
+        user_classes = [c for c in all_classes if c.get("teacherId") == teacher_id]
+        return jsonify(user_classes)
+        
+    if student_id:
+        # Filter classes where student is enrolled
+        all_students = load_students()
+        # Find all classIds for this student roll_no
+        enrolled_class_ids = {s.get("classId") for s in all_students if s.get("roll_no") == student_id}
+        
+        student_classes = [c for c in all_classes if c.get("id") in enrolled_class_ids]
+        return jsonify(student_classes)
+
+    # STRICT ISOLATION: If no ID provided, return nothing.
+    # This prevents users from seeing all data if they bypass the frontend filters.
+    return jsonify([])
 
 
 @app.route("/api/classes", methods=["POST"])
@@ -200,10 +223,11 @@ def add_class():
     name = data.get("name")
     code = data.get("code") # e.g. CS-101
     time_schedule = data.get("time") # e.g. Mon/Wed 09:00 AM
+    teacher_id = data.get("teacherId")
     image = data.get("image", "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60")
 
-    if not name or not code or not time_schedule:
-        return jsonify({"error": "name, code, and time are required"}), 400
+    if not name or not code or not time_schedule or not teacher_id:
+        return jsonify({"error": "name, code, time, and teacherId are required"}), 400
 
     classes = load_classes()
     new_id = f"C{len(classes) + 201}" # Start from 201 to avoid conflict with mock data C101-C103
@@ -216,6 +240,7 @@ def add_class():
         "id": new_id,
         "name": f"{code}: {name}", # Format to match mock data expectation
         "time": time_schedule,
+        "teacherId": teacher_id,
         "students": 0, # Default
         "image": image
     }
@@ -346,9 +371,36 @@ def save_attendance_record():
 
 @app.route("/api/attendance/<class_id>", methods=["GET"])
 def get_class_attendance(class_id):
+    student_id = request.args.get("studentId")
     all_records = load_attendance()
+    
     # Filter by class
     class_records = [r for r in all_records if r.get("classId") == class_id]
+    
+    if student_id:
+        # For a student, we want to see sessions where they were present OR absent?
+        # Typically students want to see their attendance log.
+        # The records structure is a list of sessions, each having "present_students".
+        # We should probably return the sessions, but maybe mark if they were present?
+        # Or just return sessions where they were present?
+        # User said "show their validation report for each day".
+        # Let's return all sessions for the class, but the frontend will check if they are in 'present_students'.
+        # Actually, simpler: return all class records. The frontend can check if the student is in the list.
+        # BUT for privacy, maybe we shouldn't send the full list of other students?
+        # Let's filter the "present_students" list in each record to only include THIS student if present.
+        
+        filtered_records = []
+        for record in class_records:
+            # Create a copy to not mutate original
+            new_record = record.copy()
+            # Filter present_students to just this student
+            new_record["present_students"] = [
+                s for s in record.get("present_students", []) 
+                if s.get("roll_no") == student_id
+            ]
+            filtered_records.append(new_record)
+        return jsonify(filtered_records)
+
     return jsonify(class_records)
 
 
