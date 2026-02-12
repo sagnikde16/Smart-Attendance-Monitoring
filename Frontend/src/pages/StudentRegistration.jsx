@@ -122,9 +122,14 @@ export function StudentRegistration() {
 
             {/* Error Message */}
             {error && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 flex items-center gap-3">
-                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                    <p>{error}</p>
+                <div className="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                        <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                        <p className="font-semibold">{error}</p>
+                    </div>
+                    <p className="text-xs text-red-500 ml-8">
+                        Debug: Trying to connect to <strong>{API_URL}</strong>
+                    </p>
                 </div>
             )}
 
