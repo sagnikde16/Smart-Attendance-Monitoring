@@ -6,6 +6,8 @@ import { Upload, Save, User, Video, CheckCircle, AlertCircle, Loader2, Camera } 
 import { classes } from '../data/mockData';
 import { VideoRecorder } from '../components/ui/VideoRecorder';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export function StudentRegistration() {
     const { classId } = useParams();
     // In a real app, fetch class details from backend
@@ -40,7 +42,7 @@ export function StudentRegistration() {
         formData.append('video', file);
 
         try {
-            const response = await fetch('http://localhost:8000/api/process-register-video', {
+            const response = await fetch(`${API_URL}/api/process-register-video`, {
                 method: 'POST',
                 body: formData,
             });
@@ -81,7 +83,7 @@ export function StudentRegistration() {
                 face_base64: selectedCluster.face_base64
             };
 
-            const response = await fetch('http://localhost:8000/api/students', {
+            const response = await fetch(`${API_URL}/api/students`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

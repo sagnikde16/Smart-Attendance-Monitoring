@@ -11,7 +11,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+CORS(app) # Allow all origins for deployment simplicity
 
 MEDIA_FOLDER = Path(__file__).parent / "uploads"
 DATA_FOLDER = Path(__file__).parent / "data"

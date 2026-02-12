@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+// Replaced hardcoded URL with env variable
+const API_URL = import.meta.env.VITE_API_URL;
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AddClassModal } from '../components/AddClassModal';
 import { Navbar } from '../components/Layout/Navbar';

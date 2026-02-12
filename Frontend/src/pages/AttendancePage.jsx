@@ -6,6 +6,8 @@ import { Upload, CheckCircle, AlertCircle, Loader2, UserCheck, Video } from 'luc
 import { classes } from '../data/mockData';
 import { VideoRecorder } from '../components/ui/VideoRecorder';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export function AttendancePage() {
     const { classId } = useParams();
     const currentClass = classes.find(c => c.id === classId) || { id: classId, name: 'Class' };
@@ -39,7 +41,7 @@ export function AttendancePage() {
         formData.append('classId', classId);
 
         try {
-            const response = await fetch('http://localhost:8000/api/process-attendance-video', {
+            const response = await fetch(`${API_URL}/api/process-attendance-video`, {
                 method: 'POST',
                 body: formData,
             });
@@ -70,7 +72,7 @@ export function AttendancePage() {
                 video_processed: true
             };
 
-            const response = await fetch('http://localhost:8000/api/attendance', {
+            const response = await fetch(`${API_URL}/api/attendance`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

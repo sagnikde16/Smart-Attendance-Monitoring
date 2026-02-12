@@ -5,6 +5,8 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Users, BookOpen, AlertCircle, CheckCircle, Video, UserPlus, FileText, Calendar, ArrowRight } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export function Dashboard() {
     const { classId } = useParams();
     const { user, isTeacher, isStudent } = useAuth();
@@ -25,7 +27,7 @@ export function Dashboard() {
             // 1. Fetch Class Details
             // We need to fetch all classes and find ours because we don't have a single class endpoint yet
             // Or we can just use the /api/classes logic.
-            let classesUrl = 'http://localhost:8000/api/classes';
+            let classesUrl = `${API_URL}/api/classes`;
             if (isTeacher() && user?.teacherId) {
                 classesUrl += `?teacherId=${user.teacherId}`;
             } else if (isStudent() && user?.rollNo) {
@@ -40,7 +42,7 @@ export function Dashboard() {
             }
 
             // 2. Fetch Attendance for Stats
-            let attUrl = `http://localhost:8000/api/attendance/${classId}`;
+            let attUrl = `${API_URL}/api/attendance/${classId}`;
             if (isStudent() && user?.rollNo) {
                 attUrl += `?studentId=${user.rollNo}`;
             }

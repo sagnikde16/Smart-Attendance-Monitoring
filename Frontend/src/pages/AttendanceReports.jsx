@@ -6,6 +6,8 @@ import { Download, Filter, Search, Check, X, User, Loader2 } from 'lucide-react'
 import { classes } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export function AttendanceReports() {
     const { classId } = useParams();
     const { user, isStudent } = useAuth();
@@ -26,7 +28,7 @@ export function AttendanceReports() {
         setLoading(true);
         try {
             // Fetch students first
-            const studentsRes = await fetch('http://localhost:8000/api/students');
+            const studentsRes = await fetch(`${API_URL}/api/students`);
             let students = [];
             if (studentsRes.ok) {
                 const all = await studentsRes.json();
@@ -35,7 +37,7 @@ export function AttendanceReports() {
             }
 
             // Fetch attendance
-            let url = `http://localhost:8000/api/attendance/${classId}`;
+            let url = `${API_URL}/api/attendance/${classId}`;
             if (isStudent() && user?.rollNo) {
                 url += `?studentId=${user.rollNo}`;
             }
@@ -160,7 +162,7 @@ export function AttendanceReports() {
             // Updated export to include date filtering if needed on backend, 
             // but for now keeping it simple or maybe passing date? 
             // The user asked for view filtering.
-            const response = await fetch(`http://localhost:8000/api/attendance/export/${classId}`);
+            const response = await fetch(`${API_URL}/api/attendance/export/${classId}`);
             if (!response.ok) throw new Error('Export failed');
 
             const blob = await response.blob();
