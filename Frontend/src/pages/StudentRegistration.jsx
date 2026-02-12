@@ -77,6 +77,7 @@ export function StudentRegistration() {
                 roll_no: studentData.roll_no,
                 classId: classId,
                 embedding: selectedCluster.embedding, // Use the centroid
+                embeddings_list: selectedCluster.embeddings_list || [], // Multiple reference embeddings for better matching
                 face_base64: selectedCluster.face_base64
             };
 

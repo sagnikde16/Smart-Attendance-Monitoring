@@ -5,7 +5,7 @@ import { Navbar } from '../components/Layout/Navbar';
 // import { classes } from '../data/mockData';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { Users, Clock, Plus, ArrowRight } from 'lucide-react';
+import { Users, Clock, Plus, ArrowRight, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export function ClassSelection() {
@@ -65,6 +65,25 @@ export function ClassSelection() {
         navigate(`/class/${classId}/dashboard`);
     };
 
+    const handleDeleteClass = async (e, classId) => {
+        e.stopPropagation(); // Prevent card click
+        if (!confirm("Are you sure you want to delete this subject?")) return;
+
+        try {
+            const response = await fetch(`http://localhost:8000/api/classes/${classId}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                setClassList(prev => prev.filter(c => c.id !== classId));
+            } else {
+                alert("Failed to delete class");
+            }
+        } catch (error) {
+            console.error("Delete failed:", error);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-brand-50">
             <Navbar />
@@ -107,6 +126,15 @@ export function ClassSelection() {
                                         </span>
                                         <h3 className="text-xl font-bold text-white truncate pr-4">{cls.name.split(':')[0]}</h3>
                                     </div>
+                                    {isTeacher() && (
+                                        <button
+                                            onClick={(e) => handleDeleteClass(e, cls.id)}
+                                            className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-red-500 text-white rounded-full transition-colors backdrop-blur-sm"
+                                            title="Delete Subject"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    )}
                                 </div>
                                 <Card.Content className="pt-6">
                                     <h4 className="font-semibold text-brand-900 mb-4">{cls.name.split(':')[1] || cls.name}</h4>

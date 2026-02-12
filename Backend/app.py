@@ -251,6 +251,19 @@ def add_class():
     return jsonify(new_class), 201
 
 
+@app.route("/api/classes/<class_id>", methods=["DELETE"])
+def delete_class(class_id):
+    classes = load_classes()
+    # Filter out the class
+    new_classes = [c for c in classes if c.get("id") != class_id]
+    
+    if len(new_classes) == len(classes):
+        return jsonify({"error": "Class not found"}), 404
+        
+    save_classes(new_classes)
+    return jsonify({"success": True, "message": "Class deleted"})
+
+
 @app.route("/api/process-register-video", methods=["POST"])
 def process_register_video():
     """Upload video -> Extract Faces -> Return Clusters for user to label."""
@@ -301,16 +314,18 @@ def add_student():
 
     students = load_students()
     
-    # Check duplicate roll no
-    if any(s["roll_no"] == data["roll_no"] for s in students):
-        return jsonify({"error": "Student with this Roll No already exists"}), 409
+    # Check duplicate roll no IN THE SAME CLASS
+    target_class = data.get("classId")
+    if any(s["roll_no"] == data["roll_no"] and s.get("classId") == target_class for s in students):
+        return jsonify({"error": "Student with this Roll No already exists in this class"}), 409
 
     new_student = {
         "id": str(uuid.uuid4()),
         "name": data["name"],
         "roll_no": data["roll_no"],
         "classId": data.get("classId"),
-        "embedding": data.get("embedding"), # List of floats
+        "embedding": data.get("embedding"), # Centroid embedding (backward compatible)
+        "embeddings_list": data.get("embeddings_list", []), # Multiple reference embeddings for better matching
         "face_base64": data.get("face_base64"), # Thumbnail
         "registered_at": "2023-10-27" # Mock date or current
     }
@@ -339,6 +354,14 @@ def process_attendance_video():
         # Load all students (or filter by classId if passed in form data)
         students = load_students()
         
+        # FILTER BY CLASS ID
+        class_id = request.form.get("classId")
+        if class_id:
+            print(f"DEBUG: Filtering attendance for class {class_id}")
+            students = [s for s in students if s.get("classId") == class_id]
+        else:
+            print("WARNING: No classId provided for attendance. Using ALL students.")
+
         result = recognize_faces_in_video(save_path, students, str(output_base))
         
         # Hydrate student details
@@ -513,4 +536,4 @@ def export_attendance(class_id):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=True)

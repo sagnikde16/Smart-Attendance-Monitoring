@@ -14,5 +14,13 @@
     "teacherId": "456",
     "students": 0,
     "image": ""
+  },
+  {
+    "id": "C203",
+    "name": "IM40125: PPC",
+    "time": "Mon 9am",
+    "teacherId": "123",
+    "students": 0,
+    "image": ""
   }
 ]

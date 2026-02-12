@@ -88,7 +88,7 @@ export function AttendanceReports() {
             });
 
         } else {
-            // Teacher View: Show ALL students for EACH session
+            // Teacher View: Show ALL students for EACH session, merging duplicates by Name
             attendanceData.forEach(session => {
                 const sessionDate = new Date(session.date).toISOString().slice(0, 10);
                 const date = new Date(session.date).toLocaleDateString() + ' ' + new Date(session.date).toLocaleTimeString();
@@ -99,22 +99,50 @@ export function AttendanceReports() {
                     session.present_students.forEach(p => presentMap.set(p.roll_no, p));
                 }
 
+                // Temporary map to handle duplicates by Name within this session
+                const sessionRecordsByName = new Map();
+
                 // Iterate over ALL registered students
                 students.forEach(student => {
                     const presentRecord = presentMap.get(student.roll_no);
                     const isPresent = !!presentRecord;
 
-                    flatList.push({
-                        id: `${session.id}_${student.roll_no}`,
-                        rawDate: sessionDate,
-                        date: date,
-                        studentName: student.name,
-                        studentId: student.roll_no,
-                        status: isPresent ? 'Present' : 'Absent',
-                        confidence: isPresent ? 90 : 0,
-                        evidence: presentRecord?.face_base64 ? `data:image/jpeg;base64,${presentRecord.face_base64}` : null
-                    });
+                    // Normalize name to handle minor case differences or spaces if needed (using straight match for now)
+                    const nameKey = student.name.trim();
+
+                    if (sessionRecordsByName.has(nameKey)) {
+                        // Merge logic
+                        const existing = sessionRecordsByName.get(nameKey);
+
+                        // If this instance is Present, it overrides Absent
+                        if (isPresent) {
+                            existing.status = 'Present';
+                            existing.confidence = 90;
+                            existing.evidence = `data:image/jpeg;base64,${presentRecord.face_base64}`;
+                            // Use the Roll No of the matched record as the primary one, or append?
+                            // Let's swap to the matched ID for clarity, or show both.
+                            // Showing the ID that matched is most useful.
+                            existing.studentId = student.roll_no;
+                        }
+                        // If existing was already Present, we leave it. 
+                        // If both Absent, doesn't matter.
+                    } else {
+                        // Create new entry
+                        sessionRecordsByName.set(nameKey, {
+                            id: `${session.id}_${student.roll_no}`,
+                            rawDate: sessionDate,
+                            date: date,
+                            studentName: student.name,
+                            studentId: student.roll_no,
+                            status: isPresent ? 'Present' : 'Absent',
+                            confidence: isPresent ? 90 : 0,
+                            evidence: presentRecord?.face_base64 ? `data:image/jpeg;base64,${presentRecord.face_base64}` : null
+                        });
+                    }
                 });
+
+                // Add merged records to flat list
+                sessionRecordsByName.forEach(record => flatList.push(record));
             });
         }
 
