@@ -55,18 +55,23 @@ def extract_faces_from_video(video_path, faces_dir, max_faces=MAX_FACES, strict_
     logging.info(f"Starting face extraction for {video_path}")
     
     # Try initializing MediaPipe
-    mp_face_detection = None
-    face_detection = None
+    # Check if we are on Render (Free Tier) which is memory constrained
+    IS_RENDER = os.environ.get("RENDER") or os.environ.get("DYNO")
     
-    try:
-        import mediapipe as mp
-        mp_face_detection = mp.solutions.face_detection
-        confidence = 0.5 if strict_quality else 0.2
-        face_detection = mp_face_detection.FaceDetection(model_selection=1, min_detection_confidence=confidence)
-        print(f"DEBUG: Using MediaPipe for face detection (strict={strict_quality}, conf={confidence})")
-    except Exception as e:
-        print(f"DEBUG: MediaPipe init failed ({e}), falling back to Haar Cascade")
+    # Force Haar Cascade on Render to save RAM (MediaPipe is ~100MB overhead)
+    if IS_RENDER:
+        print("DEBUG: Production environment detected. Forcing Haar Cascade to save memory.")
         face_detection = None
+    else:
+        try:
+            import mediapipe as mp
+            mp_face_detection = mp.solutions.face_detection
+            confidence = 0.5 if strict_quality else 0.2
+            face_detection = mp_face_detection.FaceDetection(model_selection=1, min_detection_confidence=confidence)
+            print(f"DEBUG: Using MediaPipe for face detection (strict={strict_quality}, conf={confidence})")
+        except Exception as e:
+            print(f"DEBUG: MediaPipe init failed ({e}), falling back to Haar Cascade")
+            face_detection = None
 
     # Load Haar Cascade if MediaPipe failed
     face_cascade = None
@@ -267,7 +272,7 @@ def get_embedding_for_face(image_path):
             img_path=image_path,
             detector_backend="skip", # We already detected/cropped
             align=True,
-            model_name="Facenet512",
+            model_name="SFace", # Much lighter model for Free Tier
             enforce_detection=False,
         )
         if objs and len(objs) > 0:

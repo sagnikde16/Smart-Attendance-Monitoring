@@ -7,3 +7,5 @@ mediapipe
 openpyxl
 pandas
 gunicorn
+deepface
+tensorflow-cpu
