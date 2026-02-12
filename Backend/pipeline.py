@@ -12,13 +12,10 @@ from sklearn.cluster import DBSCAN
 
 # Optional: DeepFace for embeddings (notebook uses VGG-Face)
 # DeepFace is disabled due to compatibility issues
-DEEPFACE_AVAILABLE = False
-try:
-    from deepface import DeepFace
-    DEEPFACE_AVAILABLE = True
-except ImportError:
-    DEEPFACE_AVAILABLE = False
-    print("DEBUG: DeepFace import failed")
+# Optional: DeepFace for embeddings (notebook uses VGG-Face)
+# DeepFace is disabled due to compatibility issues
+# MOVED TO LAZY IMPORT inside functions to prevent startup crash on Render Free Tier
+DEEPFACE_AVAILABLE = True # Assume available, will check inside function
 
 # Same as notebook
 METRIC = "cosine" # Changing to cosine as it is standard for VGG-Face
@@ -265,8 +262,16 @@ def process_face_crop(frame, x, y, w, h, faces_dir, filename):
 
 def get_embedding_for_face(image_path):
     """Notebook: DeepFace.represent with model VGG-Face."""
-    if not DEEPFACE_AVAILABLE:
+    # Lazy Import to prevent startup timeout/OOM
+    try:
+        from deepface import DeepFace
+    except ImportError:
+        print("DEBUG: DeepFace import failed (Lazy Load)")
         return None
+    except Exception as e:
+        print(f"DEBUG: DeepFace init failed: {e}")
+        return None
+
     try:
         objs = DeepFace.represent(
             img_path=image_path,
@@ -345,7 +350,8 @@ def run_pipeline(video_path, output_base_dir, use_deepface=True):
     X = []
     frame_list = []
     
-    if use_deepface and DEEPFACE_AVAILABLE:
+    if use_deepface:
+        # DeepFace usage logic
         frame_list = list(tracks_dict.values())
         frame_list.sort()
         
@@ -517,8 +523,9 @@ def recognize_faces_in_video(video_path, known_students, output_base_dir):
     3. Match against known_students using multi-embedding + majority voting.
     4. Return list of present student IDs.
     """
-    if not DEEPFACE_AVAILABLE:
-        return {"error": "DeepFace not available"}
+    # Lazy import check happens inside get_embedding_for_face now
+    # if not DEEPFACE_AVAILABLE:
+    #    return {"error": "DeepFace not available"}
 
     video_name = os.path.basename(video_path)
     video_stem = Path(video_name).stem
