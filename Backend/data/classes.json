@@ -30,5 +30,21 @@
     "teacherId": "123",
     "students": 0,
     "image": ""
+  },
+  {
+    "id": "C204",
+    "name": "IM21201: PPC",
+    "time": "Mon 9am",
+    "teacherId": "123",
+    "students": 0,
+    "image": ""
+  },
+  {
+    "id": "DEMO-01",
+    "name": "Smart Attendance Live Demo",
+    "time": "NOW",
+    "teacherId": "demo_teacher",
+    "students": 0,
+    "image": ""
   }
 ]

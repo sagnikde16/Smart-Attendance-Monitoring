@@ -108,7 +108,21 @@ export function Dashboard() {
     }
 
     if (!classDetails) {
-        return <div className="p-8 text-center text-red-500">Subject not found or access denied.</div>;
+        return (
+            <div className="p-8 text-center text-red-500">
+                <h2 className="text-xl font-bold">Access Denied or Subject Not Found</h2>
+                <p className="mt-2 text-sm text-gray-600">
+                    Failed to load class details for ID: <strong>{classId}</strong>.
+                </p>
+                <p className="text-xs text-gray-400 mt-4">
+                    Debug Info: API_URL directly from env: {API_URL} <br />
+                    User Role: {isTeacher() ? 'Teacher' : isStudent() ? 'Student' : 'Unknown'}
+                </p>
+                <Button variant="outline" className="mt-4" onClick={() => navigate('/')}>
+                    Go Home
+                </Button>
+            </div>
+        );
     }
 
     return (
